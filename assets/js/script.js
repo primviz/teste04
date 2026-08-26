@@ -1,5 +1,27 @@
-const menuButton=document.querySelector('.menu-btn');const mobileMenu=document.querySelector('.mobile-menu');menuButton?.addEventListener('click',()=>{const open=menuButton.getAttribute('aria-expanded')==='true';menuButton.setAttribute('aria-expanded',String(!open));menuButton.setAttribute('aria-label',open?'Abrir menu':'Fechar menu');mobileMenu.classList.toggle('open',!open);mobileMenu.setAttribute('aria-hidden',String(open))});mobileMenu?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{menuButton.setAttribute('aria-expanded','false');mobileMenu.classList.remove('open');mobileMenu.setAttribute('aria-hidden','true')}));
-const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!reduced){const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),{threshold:.12});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el))}else document.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));
-document.getElementById('year').textContent=new Date().getFullYear();
-const phone=document.getElementById('telefone');phone?.addEventListener('input',e=>{let v=e.target.value.replace(/\D/g,'').slice(0,11);v=v.replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2');e.target.value=v});
-const form=document.getElementById('whatsapp-form');form?.addEventListener('submit',e=>{e.preventDefault();let valid=true;form.querySelectorAll('[required]').forEach(field=>{const wrap=field.closest('.field');const error=wrap.querySelector('.error');wrap.classList.remove('invalid');error.textContent='';if(!field.value.trim()){valid=false;wrap.classList.add('invalid');error.textContent='Preencha este campo.'}});const digits=phone.value.replace(/\D/g,'');if(digits.length<10){valid=false;phone.closest('.field').classList.add('invalid');phone.closest('.field').querySelector('.error').textContent='Informe um WhatsApp válido.'}if(!valid){form.querySelector('.invalid input,.invalid select')?.focus();return}const data=new FormData(form);const extra=data.get('mensagem').trim();const msg=['Olá! Vim pelo site e gostaria de solicitar uma avaliação.','','*Nome:* '+data.get('nome'),'*WhatsApp:* '+data.get('telefone'),'*Motivo do atendimento:* '+data.get('atendimento')];if(extra)msg.push('*Mensagem:* '+extra);window.open('https://wa.me/5574999043402?text='+encodeURIComponent(msg.join('\n')),'_blank','noopener')});
+const revealItems = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{ if(entry.isIntersecting){ entry.target.classList.add('visible'); observer.unobserve(entry.target); } });
+},{threshold:.14});
+revealItems.forEach(el=>observer.observe(el));
+
+const card = document.querySelector('.tilt-card');
+if(card && matchMedia('(pointer:fine)').matches){
+  card.addEventListener('mousemove', e=>{
+    const r=card.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
+    card.style.transform=`rotateY(${x*8-5}deg) rotateX(${-y*7+2}deg) translateY(-4px)`;
+  });
+  card.addEventListener('mouseleave',()=>card.style.transform='rotateY(-5deg) rotateX(3deg)');
+}
+
+const form=document.getElementById('demoForm');
+const toast=document.getElementById('toast');
+const closeToast=toast.querySelector('button');
+let timer;
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  if(!form.checkValidity()){ form.reportValidity(); return; }
+  toast.classList.add('show');
+  clearTimeout(timer); timer=setTimeout(()=>toast.classList.remove('show'),5500);
+});
+closeToast.addEventListener('click',()=>toast.classList.remove('show'));
